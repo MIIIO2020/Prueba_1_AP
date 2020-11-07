@@ -8,6 +8,8 @@
 #install.packages("caret")
 #install.packages("glmnet")
 #install.packages("dplyr")
+install.packages("labelVector")
+
 
 library(ggplot2)
 library(dataQualityR)
@@ -28,6 +30,8 @@ library(lubridate)
 library(data.table)
 library(DMwR)
 library(dplyr)
+library(labelVector)
+
 #Descarga la data sale_complete.csv
 data=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/sale_complete.csv')
 #s_train_v2
@@ -46,15 +50,18 @@ data$item_category_name<-NULL
 print(sapply(names(data), function(x) {class(data[[x]])}))
 
 train<-data[V1<2882335,]#2882335 comienza en adelante la data de Test
-rm(data)
+
 
 
 # Listado de todos los items posibles
-L_item<- unique(data$item_id)
+L_item<- sort(as.integer(unique(data$item_id)))
+
 # para revisar estilo chapter
-c_item<-as.character(L_item)
+#c_item<-as.character(L_item)
+rm(data)
 
 #Lo nuevo
+
 I="20949"
 
 Todo_I<-train[item_id==I ,
@@ -64,15 +71,28 @@ Todo_I<-train[item_id==I ,
                 item_category_id=item_category_id
               )]
 
-#for (id in as.character(L_item)) {
-#Todo_I[,c_item)]
-#}
+
+Price_item=Todo_I[,.(
+  date=date,
+  shop_id=shop_id
+) ]
 
 
+price_id<-train[date==Todo_I$date & shop_id== Todo_I$shop_id]
 
-items_in_shop=data[data$date==Todo_I$date& data$shop_id==Todo_I$shop_id ]
+
+price_id<-train[date==Todo_I$date & shop_id== Todo_I$shop_id]
 
 
+#funciona
+#Agrega una columna al data frame con el nombre del id de los items
+for (id in as.character(L_item)) {
+  x <-replicate(nrow(Price_item),1)  # 1:nrow(Price_item)rc()
+  x <- set_label(x, id)
+  Price_item[,id]<-x
+}
+
+print()
 
 
 
