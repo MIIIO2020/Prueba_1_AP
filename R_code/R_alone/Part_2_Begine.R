@@ -50,14 +50,15 @@ data$item_category_name<-NULL
 print(sapply(names(data), function(x) {class(data[[x]])}))
 
 train<-data[V1<2882335,]#2882335 comienza en adelante la data de Test
-
+train$V1<- NULL
+train$date_block_num<- NULL
 
 
 # Listado de todos los items posibles
 L_item<- sort(as.numeric(unique(data$item_id))-1)
 
 # para revisar estilo chapter
-#c_item<-as.character(L_item)
+
 rm(data)
 
 #Lo nuevo
@@ -77,7 +78,7 @@ Todo_I<-train[item_id==I ,
 
 #Agrega una columna al data frame con el nombre del id de los items
 for (id in as.character(L_item)) {
-  #id="5822"
+  id="5822"
   if(id!=I){
   x <-replicate(nrow(Todo_I),1)  # 1:nrow(Price_item)rc()
   x <- set_label(x, id)
@@ -87,7 +88,7 @@ for (id in as.character(L_item)) {
                & shop_id == Todo_I[r,]$shop_id]$item_price
     #print(1)
     if(length(y)!=0){
-        x[r]<-y
+      if( y >0){x[r]<-log(y)}else{x[r]=0}
         }
       else{x[r]=0}
   }
@@ -95,7 +96,7 @@ for (id in as.character(L_item)) {
   }
   }
 
-
+write.csv(Todo_I,paste(as.character(I),".csv",sep = ""))
 
 
 
