@@ -1,0 +1,184 @@
+---
+title: "Prueba 1"
+output: html_notebook
+---
+
+# packats
+## install
+```{r}
+#install.packages("dataQualityR")
+install.packages("Amelia")
+#install.packages("ggfortify")
+#install.packages("alluvial")
+#install.packages("BLR")
+#install.packages("ggplot2")
+#install.packages("corrplot")
+#install.packages("caret")
+#install.packages("glmnet")
+```
+
+## Active
+```{r}
+library(ggplot2)
+library(dataQualityR)
+#library(Amelia)
+library(ggfortify)
+library(gridExtra)
+library(grid)
+library(alluvial)
+library(RColorBrewer)
+library(corrplot)
+library(Matrix)
+library(dplyr)
+library(MASS)
+library(caret)
+library(glmnet)
+library(BLR)
+library(lubridate)
+library(data.table)
+library(DMwR)
+```
+
+# Abiri Data
+## Seleccion de archivos
+
+
+```{r}
+train=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/teste_1_AP/Pythone/data/sale_complete.csv')
+#s_train_v2
+classes = sapply(names(train), function(x) {class(train[[x]])})
+print(classes)
+```
+
+# Exploración inicial de la data
+```{r}
+train$date=as.Date(train$date, format = "%d.%m.%Y")
+classes = sapply(names(train), function(x) {class(train[[x]])})
+print(classes)
+```
+
+
+```{r}
+#train$date=as.Date(train$date, format = "%d.%m.%Y")
+train$year=as.integer(format(as.Date(train$date),"%y"))
+train$month=as.integer(format(as.Date(train$date),"%m"))
+train$day=as.integer(format(as.Date(train$date),"%d"))
+
+#dia de la semana tipo numerico
+train$weekday<- as.numeric(format(train$date, format = "%u"))
+
+train$weekday_name<- weekdays(as.Date(train$date))
+```
+
+## Data Aquality Report
+shopp id
+item id
+categorig id
+month
+weekday
+
+
+## Data categorizada
+```{r}
+data_cat=train
+data_cat$shop_id=as.factor(data_cat$shop_id)
+data_cat$item_id=as.factor(data_cat$item_id)
+data_cat$item_category_id=as.factor(data_cat$item_category_id)
+#data_cat$item_id=as.factor(data_cat$item_id)   #Category
+```
+
+
+
+```{r}
+checkDataQuality(data_cat, 'DataQualityReport/num.csv', 'DataQualityReport/cat.csv')
+```
+## PArte I b. 
+
+Identifique valores extremos utilizando el método Local Outlier Factor en R. Y
+utilice la libreria DMwR y la función lofactor().
+
+### Prueba de desempeño computacional
+```{r}
+data_lo<-train[,.(
+  item_cnt_day=item_cnt_day,
+  item_price=item_price
+)]
+```
+
+
+```{r}
+vector=lofactor(data_lo[1:100000,],100)
+
+```
+
+
+```{r}
+p11 = ggplot(data=vector[!is.na(vector),], aes(x=vector)) +
+        geom_histogram(fill="blue", binwidth = 10000, aes(y=..density..)) +
+        geom_density()#Histograma, para identificar la distribución
+
+```
+
+# Parte II
+Debido a que en la Parte I, se trabajó y se generó un nuevo archivo de datos se cargará nuevamente en este apartado.
+
+```{r}
+data=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/teste_1_AP/Pythone/data/sale_complete.csv')
+#s_train_v2
+data$date=as.Date(data$date, format = "%d.%m.%Y")
+
+print(sapply(names(data), function(x) {class(data[[x]])}))
+```
+
+
+```{r}
+test<-data[format(as.Date(date),"%Y")=="2015"& (as.integer(format(as.Date(data$date),"%m"))=="10"),
+                .(
+                 V1=V1,
+                 item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+#2882335
+```
+
+
+```{r}
+train<-data[V1<2882335,
+                .(
+                 V1=V1,
+                 item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+
+```
+
+
+
+
+
+```{r}
+checkDataQuality(data, 'DataQualityReport/num.csv', 'DataQualityReport/cat.csv')
+```
+
+
+
+```{r}
+
+train<-data[ 
+  format(as.Date("2014-03-17"), "%W"),
+  
+  .(
+  item_cnt_day=item_cnt_day,
+    =item_price,
+)]
+
+```
+
+
+

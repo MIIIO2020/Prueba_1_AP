@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1604587760587.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "5|9|40|0|\n41|12|51|0|\n52|32|120|0|\n60|6|70|0|\n91|6|93|0|\n94|14|120|0|\n",
+    "hash" : "2748202656",
+    "id" : "3336D900",
+    "lastKnownWriteTime" : 1604679401,
+    "last_content_update" : 1604679401115,
+    "path" : "~/UAI/UAI_2020/AP_git/me_code/Prueba_1/TESTE_1_AP/R/Parte 1.Rmd",
+    "project_path" : "Parte 1.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "148,23",
+        "scrollLine" : "131"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

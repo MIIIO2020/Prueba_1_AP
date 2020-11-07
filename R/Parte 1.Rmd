@@ -1,0 +1,351 @@
+---
+title: "Prueba 1"
+output: html_notebook
+---
+
+# packats
+## install
+```{r}
+#install.packages("dataQualityR")
+install.packages("Amelia")
+#install.packages("ggfortify")
+#install.packages("alluvial")
+#install.packages("BLR")
+#install.packages("ggplot2")
+#install.packages("corrplot")
+#install.packages("caret")
+#install.packages("glmnet")
+install.packages("dplyr")
+```
+
+## Active
+```{r}
+library(ggplot2)
+library(dataQualityR)
+#library(Amelia)
+library(ggfortify)
+library(gridExtra)
+library(grid)
+library(alluvial)
+library(RColorBrewer)
+library(corrplot)
+library(Matrix)
+library(dplyr)
+library(MASS)
+library(caret)
+library(glmnet)
+library(BLR)
+library(lubridate)
+library(data.table)
+library(DMwR)
+library(dplyr)
+```
+
+# Abiri Data
+## Seleccion de archivos
+
+
+```{r}
+train=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/sale_complete.csv')
+#s_train_v2
+classes = sapply(names(train), function(x) {class(train[[x]])})
+print(classes)
+```
+
+# Exploración inicial de la data
+## Ajustes de Date
+```{r}
+train$date=as.Date(train$date, format = "%d.%m.%Y")
+classes = sapply(names(train), function(x) {class(train[[x]])})
+print(classes)
+```
+
+
+```{r}
+#train$date=as.Date(train$date, format = "%d.%m.%Y")
+train$year=as.integer(format(as.Date(train$date),"%y"))
+train$month=as.integer(format(as.Date(train$date),"%m"))
+train$day=as.integer(format(as.Date(train$date),"%d"))
+
+#dia de la semana tipo numerico
+train$weekday<- as.numeric(format(train$date, format = "%u"))
+
+train$weekday_name<- weekdays(as.Date(train$date))
+```
+
+## Data Aquality Report
+shopp id
+item id
+categorig id
+month
+weekday
+
+
+## Data categorizada
+```{r}
+data_cat=train
+data_cat$shop_id=as.factor(data_cat$shop_id)
+data_cat$item_id=as.factor(data_cat$item_id)
+data_cat$item_category_id=as.factor(data_cat$item_category_id)
+#data_cat$item_id=as.factor(data_cat$item_id)   #Category
+```
+
+
+
+```{r}
+checkDataQuality(data_cat, 'DataQualityReport/num.csv', 'DataQualityReport/cat.csv')
+```
+## PArte I b. 
+
+Identifique valores extremos utilizando el método Local Outlier Factor en R. Y
+utilice la libreria DMwR y la función lofactor().
+
+### Prueba de desempeño computacional
+```{r}
+data_lo<-train[,.(
+  item_cnt_day=item_cnt_day,
+  item_price=item_price
+)]
+```
+
+
+```{r}
+vector=lofactor(data_lo[1:100000,],100)
+
+```
+
+
+```{r}
+p11 = ggplot(data=vector[!is.na(vector),], aes(x=vector)) +
+        geom_histogram(fill="blue", binwidth = 10000, aes(y=..density..)) +
+        geom_density()#Histograma, para identificar la distribución
+
+```
+
+# Parte II
+Debido a que en la Parte I, se trabajó y se generó un nuevo archivo de datos se cargará nuevamente en este apartado.
+## Ajuste de los datos
+```{r}
+data=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/sale_complete.csv')
+#s_train_v2
+data$date=as.Date(data$date, format = "%d.%m.%Y")
+data$item_id=as.factor(data$item_id)
+data$shop_id=as.factor(data$shop_id)
+data$item_category_id=as.factor(data$item_category_id)
+
+print(sapply(names(data), function(x) {class(data[[x]])}))
+```
+
+
+```{r}
+test<-data[format(as.Date(date),"%Y")=="2015"& (as.integer(format(as.Date(data$date),"%m"))=="10"),
+                .(
+                 V1=V1,
+                 item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+#2882335
+```
+
+
+```{r}
+train<-data[V1<2882335,
+                .(date_block_num=date_block_num,
+                 item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+
+```
+
+## Visualización Item shop
+
+```{r}
+Y<-train[item_id=="20949"  ,# shop_id=='31' &
+                .(date_block_num=date_block_num,
+                 #item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id#,
+                 #item_price=item_price,
+                 #item_category_id=item_category_id
+               )]
+
+
+
+
+
+#X<-[item_price_item_1,item_price_item_2,item_price_item_3....]
+X<-train[ shop_id=='22'&date_block_num=='3' ,#&item_id !="20949"  ,
+                .(
+                 # date=date,
+                date_block_num=date_block_num,
+                 item_id = item_id,
+                 #item_cnt_day=item_cnt_day#,
+                 #shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+```
+
+
+
+
+```{r}
+X$item_id=as.factor(X$item_id)
+X$item_category_id=as.factor(X$item_category_id)
+checkDataQuality(X, 'DataQualityReport/num.csv', 'DataQualityReport/cat.csv')
+
+
+#library(dplyr)
+#set.seed(1)
+#dat <- as.character(X$item_id)
+X %>% 
+  group_by(item_id) %>%
+  summarise(no_rows = length(item_id))
+```
+
+
+
+
+
+
+
+
+## Ajustes de la data Train para modelar
+
+
+### Separación de los datos (train y validation)
+
+```{r}
+set.seed(0)
+training.samples <- train %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- data[training.samples, ]
+validation.data <- data[-training.samples, ]
+
+```
+
+
+###### por hacer - por cada tienda i
+
+item_cnt_day[shop_id_i]
+
+###### por hacer - por cada tienda i
+
+
+### Predictor variables
+
+```{r}
+x <- model.matrix(item_cnt_day~., train.data)[,-1]
+```
+
+
+### Outcome variable
+
+```{r}
+y <- train.data$item_cnt_day
+```
+
+
+### New predictor variables
+
+```{r}
+newX<- model.matrix(item_cnt_day~., test.data)[,-1]
+```
+
+
+### New outcome variable
+
+```{r}
+newY<- test.data$item_cnt_day
+```
+
+
+### Generación del modelo
+
+```{r}
+null<-lm(log(item_cnt_day)~1, data=data)
+full<-lm(log(item_cnt_day)~., data=data)
+outputIIa<-step(null, scope = list(upper=full), data=data, direction="both")
+summary(outputIIa)
+modelIIa =  outputIIa$call$formula
+```
+
+```{r}
+set.seed(0)
+lm_model <- train(
+  item_cnt_day ~., data = train.data, method = "lm",
+  trControl = trainControl("cv", number = 10),
+  tuneLength = 10
+  )
+```
+
+
+### Coeficientes del modelo
+
+```{r}
+coef(lm_model$finalModel)
+```
+
+
+### Predicciones
+
+```{r}
+predictions <- lm_model %>% predict(test.data)
+```
+
+
+### Desempeño de las predicciones del modelo
+
+```{r}
+data.frame(
+  RMSE = RMSE(predictions, test.data$item_cnt_day),
+  Rsquare = R2(predictions, test.data$item_cnt_day)
+)
+```
+
+
+### Variables utilizadas
+
+```{r}
+varsSelected <- length(coef(lm_model$finalModel))
+cat('Regresión Lineal Multiple usa', varsSelected, 'variables en su modelo')
+```
+
+
+
+# Generación data Por item
+```{r}
+I="20949"
+
+Todo_I<-train[item_id==I ,
+                .(
+                  date=date,
+                 #item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+
+P_I_S <- Todo_I[item_id==I ,
+                .(
+                  date=date,
+                 #item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+                )]
+
+
+```
+
+
+
+

@@ -1,0 +1,5 @@
+"0","data_cat=train"
+"0","data_cat$shop_id=as.factor(data_cat$shop_id)"
+"0","data_cat$item_id=as.factor(data_cat$item_id)"
+"0","data_cat$item_category_id=as.factor(data_cat$item_category_id)"
+"0","#data_cat$item_id=as.factor(data_cat$item_id)   #Category"
