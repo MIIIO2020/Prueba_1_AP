@@ -72,19 +72,55 @@ Todo_I<-train[item_id==I ,
               )]
 
 
+
+
+price_id<-train[date==Todo_I$date & shop_id== Todo_I$shop_id,]
+
+
+
+
 Price_item=Todo_I[,.(
   date=date,
   shop_id=shop_id
 ) ]
 
 
-price_id<-train[date==Todo_I$date & shop_id== Todo_I$shop_id]
+#Agrega una columna al data frame con el nombre del id de los items
+for (id in as.character(L_item)) {
+  
+  id="5822"
+  x <-replicate(nrow(Price_item),1)  # 1:nrow(Price_item)rc()
+  x <- set_label(x, id)
+  
+  x_data=train[item_id==id,.(date=date,shop_id=shop_id,item_price=item_price)]
+  
+  for (r in 1:nrow(Price_item)){
+    y <-x_data[x_data$date==Price_item[r,]$date 
+               & shop_id == Price_item[r,]$shop_id]$item_price
+    #print(1)
+    if(length(y)!=0){
+        x[r]<-y
+        }
+      else{x[r]=0}
+  }
+  
+  
+  Price_item[,id]<-x
+}
 
 
-price_id<-train[date==Todo_I$date & shop_id== Todo_I$shop_id]
+
+
+
 
 
 #funciona
+Price_item=Todo_I[,.(
+  date=date,
+  shop_id=shop_id
+) ]
+
+
 #Agrega una columna al data frame con el nombre del id de los items
 for (id in as.character(L_item)) {
   x <-replicate(nrow(Price_item),1)  # 1:nrow(Price_item)rc()
@@ -92,7 +128,6 @@ for (id in as.character(L_item)) {
   Price_item[,id]<-x
 }
 
-print()
 
 
 
