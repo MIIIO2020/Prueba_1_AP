@@ -54,7 +54,7 @@ train<-data[V1<2882335,]#2882335 comienza en adelante la data de Test
 
 
 # Listado de todos los items posibles
-L_item<- sort(as.integer(unique(data$item_id)))
+L_item<- sort(as.numeric(unique(data$item_id))-1)
 
 # para revisar estilo chapter
 #c_item<-as.character(L_item)
@@ -65,55 +65,42 @@ rm(data)
 I="20949"
 
 Todo_I<-train[item_id==I ,
-              .(date=date,item_cnt_day=item_cnt_day,
+              .(date=date,
+                item_cnt_day=item_cnt_day,
                 shop_id=shop_id,
                 item_price=item_price,
                 item_category_id=item_category_id
               )]
 
 
-
-
-price_id<-train[date==Todo_I$date & shop_id== Todo_I$shop_id,]
-
-
-
-
-Price_item=Todo_I[,.(
-  date=date,
-  shop_id=shop_id
-) ]
-
+#Price_item=Todo_I[,.( date=date,shop_id=shop_id) ]
 
 #Agrega una columna al data frame con el nombre del id de los items
 for (id in as.character(L_item)) {
-  
-  id="5822"
-  x <-replicate(nrow(Price_item),1)  # 1:nrow(Price_item)rc()
+  #id="5822"
+  if(id!=I){
+  x <-replicate(nrow(Todo_I),1)  # 1:nrow(Price_item)rc()
   x <- set_label(x, id)
-  
   x_data=train[item_id==id,.(date=date,shop_id=shop_id,item_price=item_price)]
-  
-  for (r in 1:nrow(Price_item)){
-    y <-x_data[x_data$date==Price_item[r,]$date 
-               & shop_id == Price_item[r,]$shop_id]$item_price
+  for (r in 1:nrow(Todo_I)){
+    y <-x_data[x_data$date==Todo_I[r,]$date 
+               & shop_id == Todo_I[r,]$shop_id]$item_price
     #print(1)
     if(length(y)!=0){
         x[r]<-y
         }
       else{x[r]=0}
   }
-  
-  
-  Price_item[,id]<-x
-}
+  Todo_I[,id]<-x
+  }
+  }
 
 
 
 
 
 
-
+######################################################################################################
 #funciona
 Price_item=Todo_I[,.(
   date=date,
