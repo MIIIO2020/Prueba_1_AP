@@ -88,7 +88,7 @@ Todo_I<-train[item_id==I ,
 #Agrega una columna al data frame con el nombre del id de los items
 
 for (id in item_N$item_id ){  #as.character(L_item)) {
-    #id="5822"
+    id="5822"
     if(id!=I){
 
 
@@ -99,7 +99,8 @@ for (id in item_N$item_id ){  #as.character(L_item)) {
                  item_price=item_price)]
   # Realiza el merge
   Todo_I<-merge(x=Todo_I,y=x_data,by=c('date','shop_id'),all.x=TRUE)
-  Todo_I[,id]<-lapply(Todo_I$item_price.y, function(x) ifelse(is.na(x),0, log(x) ) )
+  Todo_I[,id]<-lapply(Todo_I$item_price, function(x) ifelse(is.na(x),0, log(x) ) )
+  Todo_I$item_price=NULL
   Todo_I$item_price.y=NULL
   Todo_I$item_price.x=NULL
   }#if not id =I
