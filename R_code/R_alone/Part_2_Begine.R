@@ -80,18 +80,26 @@ Todo_I<-train[item_id==I ,
 for (id in as.character(L_item)) {
   #id="5822"
   if(id!=I){
-  x <-replicate(nrow(Todo_I),1)  # 1:nrow(Price_item)rc()
+  x <-replicate(nrow(Todo_I),0)  # 1:nrow(Price_item)rc() ge
   x <- set_label(x, id)
-  x_data=train[item_id==id,.(date=date,shop_id=shop_id,item_price=item_price)]
-  for (r in 1:nrow(Todo_I)){
-    y <-x_data[x_data$date==Todo_I[r,]$date 
-               & shop_id == Todo_I[r,]$shop_id]$item_price
-    #print(1)
-    if(length(y)!=0){
-      if( y >0){x[r]<-log(y)}else{x[r]=0}
-        }
-      else{x[r]=0}
-  }
+  
+  # Antes no tenia el filtrado de Date & shop_id
+  x_data=train[item_id==id&
+                 date==Todo_I$date&
+                 shop_id==Todo_I$shop_id,
+               .(date=date,
+                 shop_id=shop_id,
+                 item_price=item_price)]
+  if(length(x_data)!=0){
+      for (r in 1:nrow(Todo_I)){
+        y <-x_data[x_data$date==Todo_I[r,]$date 
+                   & shop_id == Todo_I[r,]$shop_id]$item_price
+        #print(1)
+        if(length(y)!=0){
+          if( y >0){x[r]<-log(y)}else{x[r]=0}
+            }#if length
+          else{x[r]=0}
+      }}#if_for
   Todo_I[,id]<-x
   }
   }
