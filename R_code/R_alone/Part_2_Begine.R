@@ -78,7 +78,7 @@ Todo_I<-train[item_id==I ,
 
 #Agrega una columna al data frame con el nombre del id de los items
 for (id in as.character(L_item)) {
-  id="5822"
+  #id="5822"
   if(id!=I){
   x <-replicate(nrow(Todo_I),1)  # 1:nrow(Price_item)rc()
   x <- set_label(x, id)
@@ -97,7 +97,7 @@ for (id in as.character(L_item)) {
   }
 
 write.csv(Todo_I,paste(as.character(I),".csv",sep = ""))
-
+#write.csv(x,paste(as.character(I),".csv",sep = ""))
 
 
 
