@@ -54,14 +54,24 @@ train$V1<- NULL
 train$date_block_num<- NULL
 
 
-# Listado de todos los items posibles
-L_item<- sort(as.numeric(unique(data$item_id))-1)
+## Lista de Items ####
+#Listado de todos los items posibles
+item_N=data %>% 
+  group_by(item_id) %>%
+  summarise(no_rows = length(item_id))
 
-# para revisar estilo chapter
 
+item_N <- item_N[order(-item_N$no_rows),]#$Ordena los item de mayor frecuencia a menor frecuencia
+item_N=item_N[item_N$no_rows>500,]#"item_id"
+item_N<-(item_N['item_id'])
+# para revisar  requiere tipo chapter
+
+## Elimina la data no a usar ####
 rm(data)
 
-#Lo nuevo
+
+
+## Comienza generando la data ####
 
 I="20949"
 
@@ -74,17 +84,20 @@ Todo_I<-train[item_id==I ,
               )]
 
 
-#Price_item=Todo_I[,.( date=date,shop_id=shop_id) ]
 
+
+## Función que recorre todos lo item ####
 #Agrega una columna al data frame con el nombre del id de los items
-for (id in as.character(L_item)) {
-  #id="5822"
-  if(id!=I){
-    #genera un vector el cual contendrá los precios del item id
+
+for (id in item_N<-(item_N['item_id'])){  #as.character(L_item)) {
+    #id="5822"
+    if(id!=I){
+      
+#genera un vector el cual contendrá los precios del item id
   x <-replicate(nrow(Todo_I),0)  # 1:nrow(Price_item)
   x <- set_label(x, id)
   
-  # Antes no tenia el filtrado de Date & shop_id
+# Antes no tenia el filtrado de Date & shop_id
   x_data=train[item_id==id&
                  date==Todo_I$date&
                  shop_id==Todo_I$shop_id,
@@ -107,26 +120,6 @@ for (id in as.character(L_item)) {
 
 write.csv(Todo_I,paste(as.character(I),".csv",sep = ""))
 #write.csv(x,paste(as.character(I),".csv",sep = ""))
-
-
-
-######################################################################################################
-#funciona
-Price_item=Todo_I[,.(
-  date=date,
-  shop_id=shop_id
-) ]
-
-
-#Agrega una columna al data frame con el nombre del id de los items
-for (id in as.character(L_item)) {
-  x <-replicate(nrow(Price_item),1)  # 1:nrow(Price_item)rc()
-  x <- set_label(x, id)
-  Price_item[,id]<-x
-}
-
-
-
 
 
 

@@ -70,6 +70,11 @@ item_N=data %>%
   group_by(item_id) %>%
   summarise(no_rows = length(item_id))
 
-#=summarise(data,group_by(item_id),no_rows = length(item_id))
-item_N <- item_N[order(-item_N$no_rows),]
+item_N <- item_N[order(-item_N$no_rows),]#$item_id
 
+
+item_N=item_N[item_N$no_rows>500,]#"item_id"
+
+for( i in item_N$item_id){
+  print(i)
+}
