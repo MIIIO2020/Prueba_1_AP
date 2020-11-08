@@ -84,26 +84,28 @@ Todo_I<-train[item_id==I ,
               )]
 
 
-
+D_explo<-train[train$date==Todo_I$date&
+                 train$shop_id==Todo_I$shop_id ,.(item_id=item_id,date=date,
+        shop_id=shop_id,
+        item_price=item_price)]
 
 ## Función que recorre todos lo item ####
 #Agrega una columna al data frame con el nombre del id de los items
 
-for (id in item_N<-(item_N['item_id'])){  #as.character(L_item)) {
-    #id="5822"
+for (id in item_N$item_id ){  #as.character(L_item)) {
+    id="5822"
     if(id!=I){
-      
 #genera un vector el cual contendrá los precios del item id
   x <-replicate(nrow(Todo_I),0)  # 1:nrow(Price_item)
   x <- set_label(x, id)
   
 # Antes no tenia el filtrado de Date & shop_id
-  x_data=train[item_id==id&
-                 date==Todo_I$date&
-                 shop_id==Todo_I$shop_id,
+  x_data=train[item_id==id               ,
                .(date=date,
                  shop_id=shop_id,
                  item_price=item_price)]
+  
+  
   if(length(x_data)!=0){
       for (r in 1:nrow(Todo_I)){
         y <-x_data[x_data$date==Todo_I[r,]$date 
@@ -113,7 +115,8 @@ for (id in item_N<-(item_N['item_id'])){  #as.character(L_item)) {
           if( y >0){x[r]<-log(y)}else{x[r]=0}
             }#if length
           else{x[r]=0}
-      }}#if_for
+      }#For rows
+    }#if_x_dat
   Todo_I[,id]<-x
   }#if not id =I
   }#firts For
@@ -122,4 +125,11 @@ write.csv(Todo_I,paste(as.character(I),".csv",sep = ""))
 #write.csv(x,paste(as.character(I),".csv",sep = ""))
 
 
+data_explor<-merge(x=Todo_I,y=x_data,by=c('date','shop_id'),all.x=TRUE)
+
+
+apply(data_explor$item_price.y,2, A_ln)
+
+
+data_explor$item_price.o<-lapply(data_explor$item_price.y, function(x) ifelse(is.na(x),0, log(x) ) )
 
