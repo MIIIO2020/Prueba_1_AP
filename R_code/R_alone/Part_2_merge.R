@@ -82,13 +82,13 @@ Todo_I<-train[item_id==I ,
                 item_price_Y=item_price,
                 item_category_id=item_category_id
               )]
-
+Todo_I$item_price_Y<-lapply(Todo_I$item_price, function(x) ifelse(is.na(x),0, log(x) ) )
 
 ## Función que recorre todos lo item ####
 #Agrega una columna al data frame con el nombre del id de los items
 
 for (id in item_N$item_id ){  #as.character(L_item)) {
-    id="5822"
+    #id="5822"
     if(id!=I){
 
 
