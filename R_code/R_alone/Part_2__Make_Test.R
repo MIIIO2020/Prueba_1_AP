@@ -115,8 +115,9 @@ for (id in item_N$item_id ){  #as.character(L_item)) {
 #write.csv(x,paste(as.character(I),".csv",sep = ""))
 
 
-#as.matrix(df)
-write.csv(as.matrix(Todo_I),paste(as.character(I),"_Test.csv",sep = "_"))
 
 
+#write.csv(as.matrix(Todo_I),paste(as.character(I),"_Test.csv",sep = "_"))
 
+
+write.csv(as.matrix(Todo_I),paste(as.character(I),"Train_2.csv",sep = "_"))
