@@ -1,0 +1,158 @@
+---
+title: "Prueba Análisis Predictivo"
+output: html_notebook
+---
+
+#Librerias
+```{r}
+library(caret)
+
+```
+
+
+#Load the data
+
+```{r}
+data=read.csv("/Users/antoniaindaorlandi/Desktop/Prueba Análisis Predictivo/Rolf.csv",header=TRUE, sep=";")
+```
+
+```{r}
+data
+```
+
+
+#Configuración de datos
+
+```{r}
+data$date=as.Date(data$date, format = "%d.%m.%Y")
+```
+
+
+#Separación de los datos (train y test) 
+(Test últimas 4 semanas)
+
+Datos de prueba
+```{r}
+test<-data[format(as.Date(date),"%Y")=="2015"& (as.integer(format(as.Date(data$date),"%m"))=="10"),
+                .(
+                 V1=V1,
+                 item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+#2882335
+```
+
+Datos de entrenamiento
+```{r}
+train<-data[X<2882335,.(
+                 X=X,
+                 item_id = item_id,
+                 item_cnt_day=item_cnt_day,
+                 shop_id=shop_id,
+                 item_price=item_price,
+                 item_category_id=item_category_id
+               )]
+```
+
+
+#Separación de los datos (train y validation)
+
+```{r}
+set.seed(0)
+training.samples <- train %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- data[training.samples, ]
+validation.data <- data[-training.samples, ]
+
+```
+
+
+###### por hacer - por cada tienda i
+
+item_cnt_day[shop_id_i]
+
+###### por hacer - por cada tienda i
+
+
+### Predictor variables
+
+```{r}
+x <- model.matrix(item_cnt_day~., train.data)[,-1]
+```
+
+
+### Outcome variable
+
+```{r}
+y <- train.data$item_cnt_day
+```
+
+
+### New predictor variables
+
+```{r}
+newX<- model.matrix(item_cnt_day~., test.data)[,-1]
+```
+
+
+### New outcome variable
+
+```{r}
+newY<- test.data$item_cnt_day
+```
+
+
+#Generación del modelo
+
+```{r}
+null<-lm(log(item_cnt_day)~1, data=data)
+full<-lm(log(item_cnt_day)~., data=data)
+outputIIa<-step(null, scope = list(upper=full), data=data, direction="both")
+summary(outputIIa)
+modelIIa =  outputIIa$call$formula
+```
+
+```{r}
+set.seed(0)
+lm_model <- train(
+  item_cnt_day ~., data = train.data, method = "lm",
+  trControl = trainControl("cv", number = 10),
+  tuneLength = 10
+  )
+```
+
+
+#Coeficientes del modelo
+
+```{r}
+coef(lm_model$finalModel)
+```
+
+
+#Predicciones
+
+```{r}
+predictions <- lm_model %>% predict(test.data)
+```
+
+
+#Desempeño de las predicciones del modelo
+
+```{r}
+data.frame(
+  RMSE = RMSE(predictions, test.data$item_cnt_day),
+  Rsquare = R2(predictions, test.data$item_cnt_day)
+)
+```
+
+
+#Variables utilizadas
+
+```{r}
+varsSelected <- length(coef(lm_model$finalModel))
+cat('Regresión Lineal Multiple usa', varsSelected, 'variables en su modelo')
+```
+
