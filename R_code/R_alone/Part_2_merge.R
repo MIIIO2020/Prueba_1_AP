@@ -110,8 +110,8 @@ write.csv(Todo_I,paste(as.character(I),".csv",sep = ""))
 #write.csv(x,paste(as.character(I),".csv",sep = ""))
 
 
-
-
+#as.matrix(df)
+write.csv(as.matrix(Todo_I),paste(as.character(I),"_2  .csv",sep = ""))
 
 
 
