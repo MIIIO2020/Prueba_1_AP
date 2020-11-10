@@ -34,23 +34,33 @@ library(labelVector)
 
 #Descarga la data sale_complete.csv
 data_test=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/20949__Test.csv')
-
-
-#Ajusta los atributos
-data_test$V1 = NULL
-data_test$date = NULL
-data_test$shop_id=as.factor(data$shop_id)
-data_test$item_category_id=as.factor(data$item_category_id)
+data_train=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/20949_Train_2.csv')
 
 #Visualiza el tipo de columnas
-print(sapply(names(data), function(x) {class(data[[x]])}))
+print(sapply(names(data_X), function(x) {class(data_X[[x]])}))
+colnames(data_X)
+
+
+## Funcion de Data####
+
+F_date<-function(data_X){
+#Ajusta los atributos
+  data_X$V1 = NULL
+  data_X$date = NULL
+  data_X$shop_id=as.factor(data_X$shop_id)
+  data_X$item_category_id=as.factor(data_X$item_category_id)
 
 # mueve la columna de i tem_cnt_day
-data_test <- data_test[,c(2,1,3:1248)]
-colnames(data_test)
+data_X <- data_X[,c(2,1,3:1248)]
 
+return(data_X)
+}
 
+F_date(data_test)
+F_date(data_train)
+rm(F_date)
 
+## Continuamos con las particiones ####
 ### Predictor variables
 x <- model.matrix(item_cnt_day~., data_train)[,-1]
 
@@ -61,6 +71,8 @@ y <- data_train$item_cnt_day
 newX<- model.matrix(item_cnt_day~., data_test)[,-1]
 
 ### New outcome variable
-newY<- data_test$item_cnt_day
+newY <- data_test$item_cnt_day
+
+
 
 
