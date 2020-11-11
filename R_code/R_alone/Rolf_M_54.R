@@ -9,7 +9,7 @@
 #install.packages("glmnet")
 #install.packages("dplyr")
 #install.packages("labelVector")
-install.packages("MLmetrics")
+#install.packages("MLmetrics")
 
 library(ggplot2)
 library(dataQualityR)
@@ -102,6 +102,7 @@ rm(F_date)
 
 null<-lm((item_cnt_day)~1, data=data_train)
 full<-lm(item_cnt_day~., data=data_train)
+
         #error presente si existen NA o un factor 
         #con solo una categoria
         #esto sucede con item_category_id
@@ -111,6 +112,7 @@ full<-lm(item_cnt_day~., data=data_train)
 
 output2a<-step(null, scope = list(upper=full), 
                data=data_train, direction="both")
+
 summary(output2a)
 
 rm(full,null)
@@ -136,6 +138,7 @@ coef(M_forward$finalModel)
 
 ### Make predictions
 data_test = data_test[shop_id!="36",]
+
 predictions_Forward <- M_forward %>% predict(data_test)
 
        # "ocurre un erro el si se ejecuta, debido a que hay valores NA, 
@@ -149,7 +152,9 @@ predictions_Forward <- M_forward %>% predict(data_test)
 Score_Forward=data.frame(
   RMSE = RMSE(predictions_Forward, data_test$item_cnt_day),
   Rsquare = R2(predictions_Forward, data_test$item_cnt_day),
-  MAPE= MAPE( predictions_Forward,data_test$item_cnt_day)
+  #MAPE no funciona con valores 0, por lo cual  se +1 para que funcione.
+  
+  MAPE= MAPE( predictions_Forward+1,data_test$item_cnt_day+1)
   )
 
 #print
