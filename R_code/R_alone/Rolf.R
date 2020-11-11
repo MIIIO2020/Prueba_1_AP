@@ -150,6 +150,7 @@ coef(Modelo_step_F$finalModel)
 
 
 ### Make predictions
+data_test = data_test[shop_id!="36",]
 predictions <- Modelo_step_F %>% predict(data_test)
 
        # "ocurre un erro el si se ejecuta, debido a que hay valores NA, 
@@ -159,14 +160,12 @@ predictions <- Modelo_step_F %>% predict(data_test)
        # Para aolusionar esto vere que categorias estan presentes en cada una de las dos datas
       
 
-
-
-
 ### Model prediction performance
 data.frame(
-  RMSE = RMSE(predictions, test.data$SalePrice),
-  Rsquare = R2(predictions, test.data$SalePrice)
+  RMSE = RMSE(predictions, data_test$item_cnt_day),
+  Rsquare = R2(predictions, data_test$item_cnt_day)
 )
+  #Agregar el MAPE aquí
 
 varsSelected <- length(coef(lm_model$finalModel))
 cat('Ridge uses', varsSelected, 'variables in its model')
