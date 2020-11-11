@@ -48,15 +48,11 @@ F_date<-function(data_X){
   data_X$V1 = NULL
   data_X$date = NULL
   data_X$shop_id=as.factor(data_X$shop_id)
-    #data_X$item_category_id=as.factor(data_X$item_category_id)
-    #data_X$item_category_id=integer(data_X$item_category_id)
-  
-  # tengo que quitarle el formato de factor a item_category_id
-  
+   
   # mueve la columna de i tem_cnt_day
-  data_X <- data_X[,c(2,1,3:1282)]
-  
-  #return(data_X)
+  # Solo incluye los 50 items con mas datos en el modelo
+  data_X <- data_X[,c(2,1,3:54)]
+
 }
 
 data_test<-F_date(data_test)
@@ -67,15 +63,15 @@ rm(F_date)
 
 ### (No se deberia usar)Split the data into training and test set####
 # Esto no se deberia usar #
-set.seed(123)
-training.samples <- model_data$SalePrice %>%
-  createDataPartition(p = 0.8, list = FALSE)
-
-train.data  <- model_data[training.samples, ]
-test.data <- model_data[-training.samples, ]
-
-pred_data = model_data_aux[is.na(model_data_aux$SalePrice),] 
-pred_data$SalePrice = NULL
+# set.seed(123)
+# training.samples <- model_data$SalePrice %>%
+#   createDataPartition(p = 0.8, list = FALSE)
+# 
+# train.data  <- model_data[training.samples, ]
+# test.data <- model_data[-training.samples, ]
+# 
+# pred_data = model_data_aux[is.na(model_data_aux$SalePrice),] 
+# pred_data$SalePrice = NULL
 ##################################
 
 
