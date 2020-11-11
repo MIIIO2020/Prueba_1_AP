@@ -102,19 +102,46 @@ newY <- data_test$item_cnt_day
 # tengo que quitarle el formato de factor a item_category_id
 
 # Preg 2. Regresion Lineal Multiple
-# a. Selecci?n Stepwise forward
+
+
+
+## a. Selecci?n Stepwise forward ####
 
 null<-lm((item_cnt_day)~1, data=data_train)
 full<-lm(item_cnt_day~., data=data_train)
 #error presente si existen NA o un factor con solo una categoria
 #esto sucede con item_category_id
+# Para ello cambie el formato a entero, esto solucionó el problema
 
 
 output2a<-step(null, scope = list(upper=full), data=data_train, direction="both")
 summary(output2a)
-model2a =  output2a$call$formula
 
-### Build the model
+#se contruye un modelo utilizando lo generado por la función step
+
+# model2a =  output2a$call$formula
+
+#como se detubo la operación tras 12 horas, se utilizará el ultimo modelo printeado por la función
+#tep:  AIC=-26846.07
+
+item_cnt_day) ~ shop_id + `1855` + `16787` + `4870` + `6498` + 
+  `13811` + `3734` + `8452` + `4249` + `16056` + `15044` + 
+  `3183` + `5672` + `7894` + `1555` + `2445` + `16169` + `1512` + 
+  `13071` + `6504` + `5272` + `7098` + `9355` + `7893` + `1830` + 
+  `5671` + `1905` + `16455` + `15063` + `4351` + `12908` + 
+  `3732` + `6497` + `21487` + `5823` + `5811` + `3341` + `3329` + 
+  `19415` + `10659` + `16540` + `2808` + `1809` + `14931` + 
+  `4886` + `7807` + `1516` + `16900` + `20608` + `7856` + `3733` + 
+  `2269` + `10292` + `6111` + `5669` + `4178` + `21427` + `6503` + 
+  `6466` + `14337` + `20609` + `14261` + `968` + `6121` + `5033` + 
+  `7018` + `19900` + `6954` + `5637` + `5660` + `972` + `485` + 
+  `17717` + `3331` + `6499` + `4810` + `5822` + `1850` + `20947` + 
+  `16287` + `4894` + `4242` + `4885` + `10498` + `6086` + `6738` + 
+  `1564` + `3342` + `16011` + `10957`
+
+
+
+### Build the full model ####
 set.seed(123)
 lm_model <- train(
   item_cnt_day ~., data = data_train, method = "lm",
