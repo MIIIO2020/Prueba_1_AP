@@ -96,7 +96,6 @@ newY <- data_test$item_cnt_day
 ## Reci?n ahora empecemos a resolver la prueba...####
 
 #revisar si tiene datos NA
-#checkDataQuality(data_train, 'DataQualityReport/num.csv', 'DataQualityReport/cat.csv')
 # No tiene ningun NA
 #data_train$item_category_id=as.integer(data_train$item_category_id)
 # tengo que quitarle el formato de factor a item_category_id
@@ -124,7 +123,10 @@ summary(output2a)
 #como se detubo la operación tras 12 horas, se utilizará el ultimo modelo printeado por la función
 #tep:  AIC=-26846.07
 
-item_cnt_day) ~ shop_id + `1855` + `16787` + `4870` + `6498` + 
+### Build the model of  Stepwise forward ####
+
+set.seed(123)
+Modelo_step_F= train(  item_cnt_day ~ shop_id + `1855` + `16787` + `4870` + `6498` + 
   `13811` + `3734` + `8452` + `4249` + `16056` + `15044` + 
   `3183` + `5672` + `7894` + `1555` + `2445` + `16169` + `1512` + 
   `13071` + `6504` + `5272` + `7098` + `9355` + `7893` + `1830` + 
@@ -137,9 +139,37 @@ item_cnt_day) ~ shop_id + `1855` + `16787` + `4870` + `6498` +
   `7018` + `19900` + `6954` + `5637` + `5660` + `972` + `485` + 
   `17717` + `3331` + `6499` + `4810` + `5822` + `1850` + `20947` + 
   `16287` + `4894` + `4242` + `4885` + `10498` + `6086` + `6738` + 
-  `1564` + `3342` + `16011` + `10957`
+  `1564` + `3342` + `16011` + `10957`, data=data_train ,method = "lm",
+  trControl = trainControl("cv", number = 2),
+  tuneLength = 5
+  )
 
 
+### Model coefficients
+coef(Modelo_step_F$finalModel)
+
+
+### Make predictions
+predictions <- Modelo_step_F %>% predict(data_test)
+
+       # "ocurre un erro el si se ejecuta, debido a que hay valores NA, 
+       #  
+       #  Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels) : 
+       #  factor shop_id has new levels 36 "
+       # Para aolusionar esto vere que categorias estan presentes en cada una de las dos datas
+      
+
+
+
+
+### Model prediction performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$SalePrice),
+  Rsquare = R2(predictions, test.data$SalePrice)
+)
+
+varsSelected <- length(coef(lm_model$finalModel))
+cat('Ridge uses', varsSelected, 'variables in its model')
 
 ### Build the full model ####
 set.seed(123)
@@ -163,4 +193,3 @@ data.frame(
 
 varsSelected <- length(coef(lm_model$finalModel))
 cat('Ridge uses', varsSelected, 'variables in its model')
-
