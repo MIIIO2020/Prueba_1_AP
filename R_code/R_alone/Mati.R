@@ -28,12 +28,69 @@ library(glmnet)
 library(BLR)
 library(lubridate)
 library(data.table)
-library(DMwR)
-library(dplyr)
-library(labelVector)
+#library(DMwR)
+#library(dplyr)
+#library(labelVector)
+
+
+#data_train=fread('/Users/matiaslopezportius/Desktop/UAI 2020/Analisis Predictivo/Rolf/data/20949__Test.csv')
+data_train=fread('/Users/matiaslopezportius/Desktop/UAI 2020/Analisis Predictivo/Rolf/data/20949_Train_2.csv')
+
+F_data<-function(data_X){
+  #Ajusta los atributos
+  data_X$V1 = NULL
+  data_X$date = NULL
+  data_X$shop_id=as.factor(data_X$shop_id)
+  #data_X$item_category_id=as.factor(data_X$item_category_id)
+  #data_X$item_category_id=integer(data_X$item_category_id)
+  
+  # tengo que quitarle el formato de factor a item_category_id
+  
+  # mueve la columna de i tem_cnt_day
+  data_X <- data_X[,c(2,1,3:54)]
+  
+  return(data_X)
+}
+
+#LINW 473
+data_train<-F_data(data_train)
+rm(F_date)
+
+x <- model.matrix(item_cnt_day~., data_train)[,-1]
+
+### Outcome variable
+#y <- data_train$item_cnt_day
+
+### New predictor variables
+newX<- model.matrix(item_cnt_day~., data_test)[,-1]
+
+### New outcome variable
+#newY <- data_test$item_cnt_day
+
+
+null<-lm((item_cnt_day)~1, data=data_train)
+full<-lm(item_cnt_day~., data=data_train)
+
+
+output2a<-step(null, scope = list(upper=full), data=data_train, direction="forward")
+summary(output2a)
+
+
+
+x <- model.matrix(SalePrice~., train.data)[,-1]
+
+### Outcome variable
+y <- data_test$item_cnt_day
+
+
+
+
+
+
 
 #Descarga la data sale_complete.csv
-data=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/sale_complete.csv')
+#Rolf - > data=fread('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/Prueba_1/data/sale_complete.csv')
+data=fread('/Users/matiaslopezportius/Desktop/UAI 2020/Analisis Predictivo/Rolf/data/')
 #s_Test_v2
 #Ajusta los atributos
 data$date=as.Date(data$date, format = "%d.%m.%Y")
