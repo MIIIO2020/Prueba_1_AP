@@ -50,7 +50,8 @@ F_date<-function(data_X){
   data_X$V1 = NULL
   data_X$date = NULL
   data_X$shop_id=as.factor(data_X$shop_id)
-   
+  data_X$item_price_Y<-sapply(data_X$item_price_Y, function(x) ifelse(x>0,ln(x), x ))
+  
   # mueve la columna de i tem_cnt_day
   # Solo incluye los 50 items con mas datos en el modelo
   data_X <- data_X[,c(2,1,3:404)]
