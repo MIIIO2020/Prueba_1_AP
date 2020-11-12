@@ -56,7 +56,8 @@ F_date<-function(data_X){
   data_X$item_cnt_day<-sapply(data_X$item_cnt_day, function(x) ifelse(x>0,log(x), x ))
   # mueve la columna de i tem_cnt_day
   # Solo incluye los 50 items con mas datos en el modelo
-  data_X <- data_X[,c(2,1,3:103)]
+  N=ncol(data_X)
+  data_X <- data_X[,c(2,1,3:51)]
 }
 
 data_test<-F_date(data_test)

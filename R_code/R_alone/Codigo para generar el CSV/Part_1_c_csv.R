@@ -87,7 +87,6 @@ train<-data[V1<sep,]
     item_N=item_N[item_N$no_rows>1000,]
     #Ordena los item de mayor frecuencia a menor frecuencia
     item_N <- item_N[order(-item_N$no_rows),]
-    #"item_id"
     
     item_N<-item_N['item_id']
     
