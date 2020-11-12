@@ -49,18 +49,20 @@ F_date<-function(data_X){
   #Ajusta los atributos
   data_X$V1 = NULL
   data_X$date = NULL
-  data_X$shop_id=as.factor(data_X$shop_id)
-  data_X$item_price_Y<-sapply(data_X$item_price_Y, function(x) ifelse(x>0,ln(x), x ))
+  data_X$item_category_id=NULL
   
+  data_X$shop_id=as.factor(data_X$shop_id)
+  data_X$item_price_Y<-sapply(data_X$item_price_Y, function(x) ifelse(x>0,log(x), x ))
+  data_X$item_cnt_day<-sapply(data_X$item_cnt_day, function(x) ifelse(x>0,log(x), x ))
   # mueve la columna de i tem_cnt_day
   # Solo incluye los 50 items con mas datos en el modelo
-  data_X <- data_X[,c(2,1,3:404)]
+  data_X <- data_X[,c(2,1,3:103)]
 }
 
 data_test<-F_date(data_test)
 data_train<-F_date(data_train)
 rm(F_date)
-
+data_test = data_test[shop_id!="36",]
 
 
 ## Reci?n ahora empecemos a resolver la prueba...####
@@ -74,7 +76,7 @@ rm(F_date)
 
 
 
-## a. Selecci?n Stepwise forward ####
+## Selecci?n Stepwise forward ####
 
 null<-lm((item_cnt_day)~1, data=data_train)
 full<-lm(item_cnt_day~., data=data_train)
@@ -113,7 +115,7 @@ coef(M_forward$finalModel)
 
 
 ### Make predictions
-data_test = data_test[shop_id!="36",]
+
 
 predictions_Forward <- M_forward %>% predict(data_test)
 
@@ -123,14 +125,20 @@ predictions_Forward <- M_forward %>% predict(data_test)
        #  factor shop_id has new levels 36 "
        # Para solusionar esto vere que categorias estan presentes en cada una de las dos datas
 
+predictions_Forward<-sapply(predictions_Forward, function(x) ifelse(x==0,0.000001, x ))
 
 ### Model prediction performance
 Score_Forward=data.frame(
   RMSE = RMSE(predictions_Forward, data_test$item_cnt_day),
   Rsquare = R2(predictions_Forward, data_test$item_cnt_day),
-  #MAPE no funciona con valores 0, por lo cual  se +1 para que funcione.
+  #MAPE no funciona con valores 0, por lo cual  se +0.00001 para que funcione.
+  
+  
   MAPE= MAPE( predictions_Forward+1,data_test$item_cnt_day+1)
   )
+
+
+
 
 varsSelected <- length(coef(M_forward$finalModel))
 cat('Stepwise forward',' uses', varsSelected, 'variables in its model')
@@ -155,11 +163,18 @@ coef(lm_model$finalModel)
 ### Make predictions
 predictions_lm_model <- lm_model %>% predict(data_test)
 
+predictions_lm_model<-sapply(predictions_lm_model, 
+                             function(x) ifelse(x==0,
+                                                0.000001, x ))
+
+
 ### Model prediction performance
 score_lm_model=data.frame(
   RMSE = RMSE(predictions_lm_model, data_test$item_cnt_day),
   Rsquare = R2(predictions_lm_model, data_test$item_cnt_day),
-  MAPE= MAPE( predictions_lm_model+1,data_test$item_cnt_day+1)
+  MAPE= MAPE( predictions_lm_model,sapply( data_test$item_cnt_day,
+                                            function(x) ifelse(x==0,
+                                                               0.000001, x )))
 )
 
 varsSelected <- length(coef(lm_model$finalModel))
@@ -197,7 +212,13 @@ predictions_ridge <- ridge %>% predict(data_test)
 Score_Ridge=data.frame(
   RMSE = RMSE(predictions_ridge, data_test$item_cnt_day),
   Rsquare = R2(predictions_ridge, data_test$item_cnt_day),
-  MAPE = MAPE(predictions_ridge+1, data_test$item_cnt_day+1)
+  MAPE = MAPE(sapply(predictions_ridge, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x )), 
+              sapply(data_test$item_cnt_day, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x ))
+              )
 )
 
 varsSelected <- length(which(coef(ridge$finalModel, ridge$bestTune$lambda)!=0))
@@ -231,7 +252,13 @@ predictions_lasso <- lasso %>% predict(data_test)
 Score_Lasso=data.frame(
   RMSE = RMSE(predictions_lasso, data_test$item_cnt_day),
   Rsquare = R2(predictions_lasso, data_test$item_cnt_day),
-  MAPE = MAPE(predictions_lasso+1, data_test$item_cnt_day+1)
+  MAPE = MAPE(sapply(predictions_lasso, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x )), 
+              sapply(data_test$item_cnt_day, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x ))
+  )
 )
 
 varsSelected <- length(which(coef(lasso$finalModel, lasso$bestTune$lambda)!=0))
@@ -264,41 +291,13 @@ predictions_Elastic <- elastic %>% predict(data_test)
 Score_Elastic=data.frame(
   RMSE = RMSE(predictions_Elastic, data_test$item_cnt_day),
   Rsquare = R2(predictions_Elastic, data_test$item_cnt_day),
-  MAPE = MAPE(predictions_Elastic+1, data_test$item_cnt_day+1)
-)
-
-
-varsSelected <- length(which(coef(elastic$finalModel, elastic$bestTune$lambda)!=0))
-varsNotSelected <- length(which(coef(elastic$finalModel, elastic$bestTune$lambda)==0))
-cat('ElasticNet uses', varsSelected, 'variables in its model, and did not select', varsNotSelected, 'variables.')
-
-
-#Trazas elastic net
-plot(elastic, main="Elastic Net", xvar="lambda")
-
-
-
-# c. Elastic net
-
-lambda = seq(-6,6,0.1)
-### Build the model
-set.seed(123)
-elastic <- train(
-  item_cnt_day ~., data = data_train, method = "glmnet",
-  trControl = trainControl("cv", number = 10),
-  tuneLength = 10
-)
-### Model coefficients
-coef(elastic$finalModel, elastic$bestTune$lambda)
-
-### Make predictions
-predictions_Elastic <- elastic %>% predict(data_test)
-
-### Model prediction performance
-Score_Elastic=data.frame(
-  RMSE = RMSE(predictions_Elastic, data_test$item_cnt_day),
-  Rsquare = R2(predictions_Elastic, data_test$item_cnt_day),
-  MAPE = MAPE(predictions_Elastic+1, data_test$item_cnt_day+1)
+  MAPE = MAPE(sapply(predictions_Elastic, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x )), 
+              sapply(data_test$item_cnt_day, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x ))
+  )
 )
 
 
@@ -331,9 +330,16 @@ summary
 ### Make predictions
 predictions_Elasticidad <- Elasticidad %>% predict(data_test)
 
+
+
 ### Model prediction performance
 Score_Elasticidad=data.frame(
   RMSE = RMSE(predictions_Elasticidad, data_test$item_cnt_day),
   Rsquare = R2(predictions_Elasticidad, data_test$item_cnt_day),
-  MAPE = MAPE(predictions_Elasticidad+1, data_test$item_cnt_day+1)
-)
+  MAPE = MAPE(sapply(predictions_Elasticidad, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x )), 
+              sapply(data_test$item_cnt_day, 
+                     function(x) ifelse(x==0,
+                                        0.000001, x ))
+  ))

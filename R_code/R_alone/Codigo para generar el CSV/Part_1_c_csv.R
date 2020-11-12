@@ -107,13 +107,14 @@ Make_data<-function(Data_in){
   
   
   # Antes no tenia el filtrado de Date & shop_id
-    x_data=train[item_id==id&item_price>0,
+    x_data=train[item_id==id&
+                   item_price>0 ,
                  .(date=date,
                    shop_id=shop_id,
                    item_price=item_price)]
     # Realiza el merge
     Todo_I<-merge(x=Todo_I,y=x_data,by=c('date','shop_id'),all.x=TRUE)
-    Todo_I[,id]<-sapply(Todo_I$item_price, function(x) ifelse(is.na(x),0, x ) )
+    Todo_I[,id]<-sapply(Todo_I$item_price, function(x) ifelse(is.na(x),0, log(x) ) )
     
     
     Todo_I$item_price=NULL
