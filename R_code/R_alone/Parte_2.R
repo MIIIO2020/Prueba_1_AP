@@ -133,9 +133,10 @@ Score_Forward=data.frame(
   RMSE = RMSE(predictions_Forward, data_test$item_cnt_day),
   Rsquare = R2(predictions_Forward, data_test$item_cnt_day),
   #MAPE no funciona con valores 0, por lo cual  se +0.00001 para que funcione.
+  MAPE= MAPE( predictions_Forward,sapply( data_test$item_cnt_day,
+                                           function(x) ifelse(x==0,
+                                                              0.000001, x )))
   
-  
-  MAPE= MAPE( predictions_Forward+1,data_test$item_cnt_day+1)
   )
 
 
@@ -183,14 +184,13 @@ cat('Model Clasic  uses', varsSelected, 'variables in its model')
 rm(varsSelected)
 
 
-rm(lm_model)
 
 ### Parte 2 B ####
 
 
 # Ridge
 
-### Build the model
+### Build the model Ridge
 
 lambda <- 10^seq(-3, 2, length = 100)
 lambda = seq(-6,6,0.1)
@@ -232,7 +232,7 @@ plot(ridge, main="Ridge", xvar="lambda")
 ## Parte 2 c####
 # b. Lasso
 #(alpha debe fijarse en 1 para Lasso)
-### Build the model
+### Build the model Lasso
 lambda <- 10^seq(-3, 1, length = 100)
 lambda = seq(-6,6,0.1)
 
