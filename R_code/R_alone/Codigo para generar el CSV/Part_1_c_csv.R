@@ -36,18 +36,35 @@ library(dplyr)
 
 #Descarga la data sale_complete.csv
 data=fread(paste('C:/Users/rolft/Documents/UAI/UAI_2020/AP_git/me_code/',
-            'Prueba_1/data/sale_complete.csv',sep = ""))
+            'Prueba_1/data/data.csv',sep = ""))
   
 #Ajusta los atributos
-data$date=as.Date(data$date, format = "%d.%m.%Y")
+data$date=as.Date(data$date, format ="%Y-%m-%d") #"%d.%m.%Y")
 data$item_id=as.factor(data$item_id)
 data$shop_id=as.factor(data$shop_id)
 data$item_category_id=as.factor(data$item_category_id)
+
 #Elimina las columnas que no se usarán
+data$date_block_num<- NULL
 data$shop_name<- NULL
 data$item_name<-NULL
 data$item_category_name<-NULL
+data$month<- NULL
+data$month_name<- NULL
+data$year<- NULL
+data$day<- NULL
+data$weekday<- NULL
+data$weekday_name<- NULL
+data$shop_id_categorico<- NULL
 
+
+#Ordena los item de mayor frecuencia a menor frecuencia
+data <- data[order(-data$date),]
+
+V1=1:nrow(data)
+V1=order(-V1)
+data$V1=V1
+rm(V1)
 
 #Visualiza el tipo de columnas
 print(sapply(names(data), function(x) {class(data[[x]])}))
@@ -55,8 +72,9 @@ print(sapply(names(data), function(x) {class(data[[x]])}))
 ## Separo en Test / Train
 test<-data[format(as.Date(date),"%Y")=="2015"& 
              (as.integer(format(as.Date(data$date),"%m"))=="10"),]
-
-sep=test$V1[1]
+nrow(test)
+sep=test$V1[nrow(test)]
+rm(sep)
 #2882335 comienza en adelante la data de Test
 train<-data[V1<sep,]
 
