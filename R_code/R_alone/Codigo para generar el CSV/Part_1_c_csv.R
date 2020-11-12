@@ -92,7 +92,7 @@ train<-data[V1<sep,]
     item_N<-item_N['item_id']
     
     ### cambiar####
-    item_N<-item_N[1:101,]
+    #item_N<-item_N[1:101,]
     
     
     # para revisar  requiere tipo chapter
